@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { AccessibilityPreferences } from "@/components/accessibility-preferences";
+import { ContrastProvider } from "@/components/contrast-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,10 +25,25 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="de"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ContrastProvider>
+            <header className="sticky top-0 z-40 flex items-center justify-end border-b border-border bg-background/80 px-4 py-2 backdrop-blur">
+              <AccessibilityPreferences />
+            </header>
+            {children}
+          </ContrastProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
