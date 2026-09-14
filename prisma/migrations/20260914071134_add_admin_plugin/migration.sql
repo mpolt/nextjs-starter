@@ -1,0 +1,10 @@
+-- AlterTable
+ALTER TABLE `session` ADD COLUMN `impersonatedBy` TEXT NULL;
+
+-- AlterTable
+ALTER TABLE `user` ADD COLUMN `banExpires` DATETIME(3) NULL,
+    ADD COLUMN `banReason` TEXT NULL,
+    ADD COLUMN `banned` BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN `role` TEXT NULL;
+
+UPDATE `user` SET `role` = 'user' WHERE `role` IS NULL;

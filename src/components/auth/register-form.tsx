@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { AuthCard, AuthLink } from "@/components/auth/auth-card";
+import { SocialAuth } from "@/components/auth/social-auth";
 import { PasswordField, TextField } from "@/components/forms/fields";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
@@ -12,7 +13,11 @@ import { authClient } from "@/lib/auth-client";
 import { withDynamicSchema } from "@/lib/form";
 import { registerSchema } from "@/lib/validations/auth";
 
-export function RegisterForm() {
+type RegisterFormProps = {
+  googleEnabled?: boolean;
+};
+
+export function RegisterForm({ googleEnabled = false }: RegisterFormProps) {
   const router = useRouter();
 
   const form = useForm({
@@ -44,14 +49,20 @@ export function RegisterForm() {
   return (
     <AuthCard
       title="Registrieren"
-      description="Erstelle ein neues Konto mit E-Mail und Passwort."
+      description={
+        googleEnabled
+          ? "Erstelle ein Konto mit Google oder E-Mail und Passwort."
+          : "Erstelle ein neues Konto mit E-Mail und Passwort."
+      }
       footer={
         <p className="text-sm text-muted-foreground">
           Bereits registriert? <AuthLink href="/login">Anmelden</AuthLink>
         </p>
       }
     >
-      <form
+      <div className="space-y-6">
+        <SocialAuth enabled={googleEnabled} callbackURL="/dashboard" />
+        <form
         className="space-y-6"
         onSubmit={(e) => {
           e.preventDefault();
@@ -108,7 +119,8 @@ export function RegisterForm() {
             </Button>
           )}
         </form.Subscribe>
-      </form>
+        </form>
+      </div>
     </AuthCard>
   );
 }

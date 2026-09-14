@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { hasAdminRole } from "@/lib/auth-config";
 import { safeRedirectPath } from "@/lib/redirect";
 
 export async function getSession() {
@@ -25,4 +26,12 @@ export async function requireGuest() {
   if (session) {
     redirect("/dashboard");
   }
+}
+
+export async function requireAdmin() {
+  const session = await requireSession();
+  if (!hasAdminRole(session.user.role)) {
+    redirect("/dashboard");
+  }
+  return session;
 }

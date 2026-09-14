@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, Settings } from "lucide-react";
+import { Home, LayoutDashboard, Settings, Users } from "lucide-react";
 
 import {
   Sidebar,
@@ -32,8 +32,23 @@ const navItems = [
   },
 ] as const;
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  isAdmin?: boolean;
+};
+
+export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
   const pathname = usePathname();
+
+  const items = isAdmin
+    ? [
+        ...navItems,
+        {
+          title: "Benutzer",
+          href: "/dashboard/users",
+          icon: Users,
+        } as const,
+      ]
+    : navItems;
 
   return (
     <Sidebar collapsible="icon">
@@ -60,7 +75,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {items.map((item) => {
                 const isActive =
                   item.href === "/dashboard"
                     ? pathname === "/dashboard"

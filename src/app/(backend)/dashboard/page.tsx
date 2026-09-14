@@ -36,6 +36,10 @@ export default async function DashboardPage() {
             <span className="text-muted-foreground">Verifiziert:</span>{" "}
             {session.user.emailVerified ? "Ja" : "Nein"}
           </p>
+          <p>
+            <span className="text-muted-foreground">Rolle:</span>{" "}
+            {session.user.role ?? "user"}
+          </p>
         </CardContent>
       </Card>
     </div>

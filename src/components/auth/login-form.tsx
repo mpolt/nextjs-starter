@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { AuthCard, AuthLink } from "@/components/auth/auth-card";
+import { SocialAuth } from "@/components/auth/social-auth";
 import { CheckboxField, PasswordField, TextField } from "@/components/forms/fields";
 import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
@@ -14,7 +15,11 @@ import { withDynamicSchema } from "@/lib/form";
 import { safeRedirectPath } from "@/lib/redirect";
 import { loginSchema } from "@/lib/validations/auth";
 
-export function LoginForm() {
+type LoginFormProps = {
+  googleEnabled?: boolean;
+};
+
+export function LoginForm({ googleEnabled = false }: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = safeRedirectPath(searchParams.get("redirect"));
@@ -55,14 +60,20 @@ export function LoginForm() {
   return (
     <AuthCard
       title="Anmelden"
-      description="Melde dich mit deiner E-Mail-Adresse an."
+      description={
+        googleEnabled
+          ? "Melde dich mit Google oder deiner E-Mail-Adresse an."
+          : "Melde dich mit deiner E-Mail-Adresse an."
+      }
       footer={
         <p className="text-sm text-muted-foreground">
           Noch kein Konto? <AuthLink href="/register">Registrieren</AuthLink>
         </p>
       }
     >
-      <form
+      <div className="space-y-6">
+        <SocialAuth enabled={googleEnabled} callbackURL={redirectTo} />
+        <form
         className="space-y-6"
         onSubmit={(e) => {
           e.preventDefault();
@@ -112,7 +123,8 @@ export function LoginForm() {
             )}
           </form.Subscribe>
         </div>
-      </form>
+        </form>
+      </div>
     </AuthCard>
   );
 }

@@ -4,7 +4,7 @@ Next.js-Template mit Authentifizierung, Dashboard und Einstellungen. Ideal als A
 
 ## Was mitkommt
 
-- **Auth** (Better Auth): Registrierung, Login, E-Mail-Verifikation, Passwort-Reset, Sessions
+- **Auth** (Better Auth): Registrierung, Login, E-Mail-Verifikation, Passwort-Reset, Sessions, optionales Google-Login, Admin-Plugin
 - **Dashboard** mit Sidebar und geschützten Routen
 - **Einstellungen**: Profil, Passwort ändern, aktive Sitzungen
 - **Theme**: Hell/Dunkel/System + hoher Kontrast
@@ -48,6 +48,8 @@ In `.env` anpassen:
 - `DATABASE_URL` — Verbindungsstring zur DB
 - `BETTER_AUTH_SECRET` — Secret erzeugen: `openssl rand -base64 32`
 - `BETTER_AUTH_URL` — z. B. `http://localhost:3000`
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — optional, Google-Login
+- `ADMIN_EMAIL` — optional, diese Adresse wird beim Signup zum Admin
 
 ### 4. Migrationen
 
@@ -66,6 +68,32 @@ pnpm dev
 ## E-Mails
 
 Solange kein Mail-Provider angebunden ist, schreibt [`src/lib/email.ts`](src/lib/email.ts) alle Mails in die **Server-Konsole** (Verifikation, Passwort-Reset). Das ist Absicht für die lokale Entwicklung.
+
+## Google-Login
+
+Google ist **optional**. Der Button erscheint auf Login und Registrierung nur, wenn **beide** Variablen in `.env` gesetzt sind:
+
+```env
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+```
+
+In der Google Cloud Console als Redirect-URI eintragen:
+
+`http://localhost:3000/api/auth/callback/google`
+
+Ohne Keys bleibt nur E-Mail/Passwort — der Rest der App ist unverändert.
+
+## Admin
+
+Das Better-Auth-Admin-Plugin bringt Rollen (`user` / `admin`), Sperren und Impersonation mit. Die Benutzerverwaltung liegt unter `/dashboard/users` und ist nur für Admins sichtbar.
+
+Den ersten Admin anlegen:
+
+1. `ADMIN_EMAIL="du@example.com"` in `.env` setzen und mit genau dieser Adresse registrieren (E-Mail oder Google), **oder**
+2. CLI: `pnpm dlx auth@latest create-admin --email du@example.com --name "Admin"`
+
+Danach im Dashboard unter **Benutzer** Rollen setzen, Konten sperren oder als anderer User impersonieren.
 
 ## Projektnamen ändern
 
@@ -88,7 +116,7 @@ src/
   app/
     (frontend)/     # öffentliche Seiten (Landing)
     (auth)/         # Login, Register, Reset, Verify
-    (backend)/      # Dashboard & Settings (App-Shell, nicht die API)
+    (backend)/      # Dashboard, Settings, Benutzerverwaltung (App-Shell, nicht die API)
     api/auth/       # Better Auth Catch-all
   components/
     auth/           # Auth- und Settings-Formulare

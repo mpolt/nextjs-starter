@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LogOut, Settings, LayoutDashboard, User } from "lucide-react";
+import { LogOut, Settings, LayoutDashboard, User, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ type UserMenuProps = {
     name: string;
     email: string;
   };
+  isAdmin?: boolean;
 };
 
 function initials(name: string) {
@@ -34,7 +35,7 @@ function initials(name: string) {
     .join("");
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+export function UserMenu({ user, isAdmin = false }: UserMenuProps) {
   const router = useRouter();
 
   async function handleSignOut() {
@@ -86,6 +87,12 @@ export function UserMenu({ user }: UserMenuProps) {
             <Settings />
             Einstellungen
           </DropdownMenuItem>
+          {isAdmin ? (
+            <DropdownMenuItem onClick={() => router.push("/dashboard/users")}>
+              <Users />
+              Benutzer
+            </DropdownMenuItem>
+          ) : null}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => void handleSignOut()}>
