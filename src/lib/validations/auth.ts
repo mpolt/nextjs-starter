@@ -63,3 +63,35 @@ export const changePasswordSchema = z
 export const resendVerificationSchema = z.object({
   email: emailSchema,
 });
+
+export const adminRoleSchema = z.enum(["user", "admin"]);
+
+export const adminCreateUserSchema = z.object({
+  name: nameSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  role: adminRoleSchema,
+});
+
+export const adminEditUserSchema = z
+  .object({
+    name: nameSchema,
+    email: emailSchema,
+    password: z.string().max(128, "Maximal 128 Zeichen."),
+    role: adminRoleSchema,
+  })
+  .superRefine((data, ctx) => {
+    if (data.password.length === 0) {
+      return;
+    }
+    const result = passwordSchema.safeParse(data.password);
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        ctx.addIssue({
+          code: "custom",
+          message: issue.message,
+          path: ["password"],
+        });
+      }
+    }
+  });

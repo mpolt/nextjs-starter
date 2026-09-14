@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  adminCreateUserSchema,
+  adminEditUserSchema,
   changePasswordSchema,
   loginSchema,
   registerSchema,
@@ -116,5 +118,60 @@ describe("changePasswordSchema", () => {
         confirmPassword: "mismatch",
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("adminCreateUserSchema", () => {
+  it("requires a password and role", () => {
+    expect(
+      adminCreateUserSchema.safeParse({
+        name: "Max",
+        email: "max@example.com",
+        password: "password1",
+        role: "user",
+      }).success,
+    ).toBe(true);
+
+    expect(
+      adminCreateUserSchema.safeParse({
+        name: "Max",
+        email: "max@example.com",
+        password: "short",
+        role: "admin",
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe("adminEditUserSchema", () => {
+  it("allows an empty password", () => {
+    expect(
+      adminEditUserSchema.safeParse({
+        name: "Max",
+        email: "max@example.com",
+        password: "",
+        role: "user",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("validates a non-empty password", () => {
+    expect(
+      adminEditUserSchema.safeParse({
+        name: "Max",
+        email: "max@example.com",
+        password: "short",
+        role: "user",
+      }).success,
+    ).toBe(false);
+
+    expect(
+      adminEditUserSchema.safeParse({
+        name: "Max",
+        email: "max@example.com",
+        password: "password1",
+        role: "admin",
+      }).success,
+    ).toBe(true);
   });
 });

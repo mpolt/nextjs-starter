@@ -32,23 +32,67 @@ const navItems = [
   },
 ] as const;
 
+const adminNavItems = [
+  {
+    title: "Benutzer",
+    href: "/dashboard/users",
+    icon: Users,
+  },
+] as const;
+
+type NavItem = {
+  title: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+};
+
 type AppSidebarProps = {
   isAdmin?: boolean;
 };
 
+function isNavActive(pathname: string, href: string) {
+  if (href === "/dashboard") {
+    return pathname === "/dashboard";
+  }
+  return pathname.startsWith(href);
+}
+
+function NavGroup({
+  label,
+  items,
+  pathname,
+}: {
+  label: string;
+  items: readonly NavItem[];
+  pathname: string;
+}) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                render={<Link href={item.href} />}
+                isActive={isNavActive(pathname, item.href)}
+                tooltip={item.title}
+              >
+                <item.icon />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  {item.title}
+                </span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+}
+
 export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
   const pathname = usePathname();
-
-  const items = isAdmin
-    ? [
-        ...navItems,
-        {
-          title: "Benutzer",
-          href: "/dashboard/users",
-          icon: Users,
-        } as const,
-      ]
-    : navItems;
 
   return (
     <Sidebar collapsible="icon">
@@ -71,34 +115,14 @@ export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => {
-                const isActive =
-                  item.href === "/dashboard"
-                    ? pathname === "/dashboard"
-                    : pathname.startsWith(item.href);
-
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      render={<Link href={item.href} />}
-                      isActive={isActive}
-                      tooltip={item.title}
-                    >
-                      <item.icon />
-                      <span className="group-data-[collapsible=icon]:hidden">
-                        {item.title}
-                      </span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <NavGroup label="Navigation" items={navItems} pathname={pathname} />
+        {isAdmin ? (
+          <NavGroup
+            label="Administration"
+            items={adminNavItems}
+            pathname={pathname}
+          />
+        ) : null}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

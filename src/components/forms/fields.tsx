@@ -11,6 +11,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type TextFieldProps = {
   field: AnyFieldApi;
@@ -138,6 +145,67 @@ export function CheckboxField({
         {description ? <FieldDescription>{description}</FieldDescription> : null}
         {isInvalid ? <FieldError errors={fieldErrors(field)} /> : null}
       </div>
+    </Field>
+  );
+}
+
+type SelectOption = {
+  label: string;
+  value: string;
+};
+
+type SelectFieldProps = {
+  field: AnyFieldApi;
+  label: string;
+  description?: string;
+  options: SelectOption[];
+  placeholder?: string;
+  disabled?: boolean;
+};
+
+export function SelectField({
+  field,
+  label,
+  description,
+  options,
+  placeholder,
+  disabled,
+}: SelectFieldProps) {
+  const isInvalid = field.state.meta.errors.length > 0;
+  const value = (field.state.value as string) ?? "";
+
+  return (
+    <Field data-invalid={isInvalid || undefined}>
+      <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+      <Select
+        items={options}
+        value={value}
+        onValueChange={(next) => {
+          if (next == null) {
+            return;
+          }
+          field.handleChange(next);
+          field.handleBlur();
+        }}
+        disabled={disabled}
+      >
+        <SelectTrigger
+          id={field.name}
+          className="w-full"
+          aria-invalid={isInvalid}
+        >
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {description ? <FieldDescription>{description}</FieldDescription> : null}
+      {isInvalid ? <FieldError errors={fieldErrors(field)} /> : null}
     </Field>
   );
 }
