@@ -14,7 +14,7 @@ model User {
   accounts      Account[]
 
   @@unique([email])
-  @@map("user")
+  @@map("auth_user")
 }
 
 model Session {
@@ -31,7 +31,7 @@ model Session {
 
   @@unique([token])
   @@index([userId(length: 191)])
-  @@map("session")
+  @@map("auth_session")
 }
 
 model Account {
@@ -51,7 +51,7 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   @@index([userId(length: 191)])
-  @@map("account")
+  @@map("auth_account")
 }
 
 model Verification {
@@ -63,5 +63,5 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier(length: 191)])
-  @@map("verification")
+  @@map("auth_verification")
 }
