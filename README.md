@@ -1,36 +1,129 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Starter
 
-## Getting Started
+Next.js-Template mit Authentifizierung, Dashboard und Einstellungen. Ideal als Ausgangspunkt für neue Apps.
 
-First, run the development server:
+## Was mitkommt
+
+- **Auth** (Better Auth): Registrierung, Login, E-Mail-Verifikation, Passwort-Reset, Sessions
+- **Dashboard** mit Sidebar und geschützten Routen
+- **Einstellungen**: Profil, Passwort ändern, aktive Sitzungen
+- **Theme**: Hell/Dunkel/System + hoher Kontrast
+- **UI**: shadcn (Base Nova), TanStack Form, Zod
+
+## Stack
+
+- Next.js 16 (App Router)
+- Better Auth + Prisma 7 (MariaDB/MySQL)
+- shadcn/ui + Base UI, Tailwind CSS 4
+- TanStack Form, Zod
+- Vitest (Unit-Tests)
+- pnpm
+
+## Setup
+
+### 1. Abhängigkeiten
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Datenbank
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Lokale MariaDB mit Docker:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+docker compose up -d
+```
 
-## Learn More
+Oder eine bestehende MySQL/MariaDB-Instanz nutzen.
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Umgebungsvariablen
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cp .env.example .env
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+In `.env` anpassen:
 
-## Deploy on Vercel
+- `DATABASE_URL` — Verbindungsstring zur DB
+- `BETTER_AUTH_SECRET` — Secret erzeugen: `openssl rand -base64 32`
+- `BETTER_AUTH_URL` — z. B. `http://localhost:3000`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Migrationen
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm db:migrate
+```
+
+### 5. Entwicklungsserver
+
+```bash
+pnpm dev
+```
+
+Öffne [http://localhost:3000](http://localhost:3000).
+
+## E-Mails
+
+Solange kein Mail-Provider angebunden ist, schreibt [`src/lib/email.ts`](src/lib/email.ts) alle Mails in die **Server-Konsole** (Verifikation, Passwort-Reset). Das ist Absicht für die lokale Entwicklung.
+
+## Projektnamen ändern
+
+Name, Beschreibung und Logo-Buchstabe stehen zentral in [`src/lib/site.ts`](src/lib/site.ts):
+
+```ts
+export const site = {
+  name: "Starter",
+  description: "Next.js Starter mit Auth und Dashboard",
+  logoLetter: "S",
+} as const;
+```
+
+Zusätzlich den `name` in `package.json` und ggf. den Contrast-Storage-Key in `src/components/contrast-provider.tsx` anpassen.
+
+## Ordnerstruktur
+
+```
+src/
+  app/
+    (frontend)/     # öffentliche Seiten (Landing)
+    (auth)/         # Login, Register, Reset, Verify
+    (backend)/      # Dashboard & Settings (App-Shell, nicht die API)
+    api/auth/       # Better Auth Catch-all
+  components/
+    auth/           # Auth- und Settings-Formulare
+    backend/        # Sidebar, Settings-Nav
+    forms/          # wiederverwendbare Form-Felder
+    ui/             # shadcn-Komponenten
+  lib/
+    auth.ts         # Better Auth Server
+    site.ts         # Branding
+    email.ts        # Dev-Mailer (Konsole)
+    redirect.ts     # Open-Redirect-Schutz (+ Tests)
+    validations/    # Zod-Schemas (+ Tests)
+prisma/
+  schema/           # Prisma-Schema (Auth-Modelle)
+```
+
+Die Route Groups `(frontend)` und `(backend)` erscheinen nicht in der URL. `(backend)` meint die eingeloggte App-Shell, nicht ein separates Backend.
+
+## Scripts
+
+| Script | Beschreibung |
+|--------|--------------|
+| `pnpm dev` | Entwicklungsserver |
+| `pnpm build` | Prisma generate + Production-Build |
+| `pnpm start` | Production-Server |
+| `pnpm lint` | ESLint |
+| `pnpm typecheck` | TypeScript-Check |
+| `pnpm test` | Unit-Tests (Vitest) |
+| `pnpm test:watch` | Unit-Tests im Watch-Modus |
+| `pnpm db:migrate` | Prisma Migrate (dev) |
+| `pnpm db:studio` | Prisma Studio |
+
+## Weiterführend
+
+- [Better Auth](https://www.better-auth.com/docs)
+- [Prisma](https://www.prisma.io/docs)
+- [Next.js](https://nextjs.org/docs)
+- [shadcn/ui](https://ui.shadcn.com)
