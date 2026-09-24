@@ -60,7 +60,9 @@ export function RegisterForm({
         return
       }
 
-      router.push(redirectTo)
+      router.push(
+        `/verify-email?email=${encodeURIComponent(value.email)}`
+      )
       router.refresh()
     },
   })

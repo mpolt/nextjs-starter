@@ -33,6 +33,8 @@ export function LoginForm({
 }: LoginFormProps) {
   const router = useRouter()
   const [formError, setFormError] = useState<string | null>(null)
+  const [needsVerification, setNeedsVerification] = useState(false)
+  const [submittedEmail, setSubmittedEmail] = useState("")
   const redirectTo = getSafeCallbackUrl(callbackUrl)
 
   const form = useForm({
@@ -46,6 +48,8 @@ export function LoginForm({
     },
     onSubmit: async ({ value }) => {
       setFormError(null)
+      setNeedsVerification(false)
+      setSubmittedEmail(value.email)
 
       const { error } = await authClient.signIn.email({
         email: value.email,
@@ -54,6 +58,14 @@ export function LoginForm({
       })
 
       if (error) {
+        if (error.status === 403) {
+          setNeedsVerification(true)
+          setFormError(
+            "Bitte bestätige zuerst deine E-Mail-Adresse."
+          )
+          return
+        }
+
         setFormError(error.message ?? "Anmeldung fehlgeschlagen.")
         return
       }
@@ -65,6 +77,7 @@ export function LoginForm({
 
   async function signInWithGoogle() {
     setFormError(null)
+    setNeedsVerification(false)
 
     const { error } = await authClient.signIn.social({
       provider: "google",
@@ -123,7 +136,15 @@ export function LoginForm({
           <form.Field name="password">
             {(field) => (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor={field.name}>Passwort</Label>
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor={field.name}>Passwort</Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+                  >
+                    Passwort vergessen?
+                  </Link>
+                </div>
                 <PasswordInput
                   id={field.name}
                   name={field.name}
@@ -146,7 +167,17 @@ export function LoginForm({
           </form.Field>
 
           {formError ? (
-            <p className="text-sm text-destructive">{formError}</p>
+            <div className="flex flex-col gap-1">
+              <p className="text-sm text-destructive">{formError}</p>
+              {needsVerification ? (
+                <Link
+                  href={`/verify-email?email=${encodeURIComponent(submittedEmail)}`}
+                  className="text-sm text-foreground underline-offset-4 hover:underline"
+                >
+                  Bestätigungslink erneut senden
+                </Link>
+              ) : null}
+            </div>
           ) : null}
 
           <form.Subscribe selector={(state) => state.isSubmitting}>

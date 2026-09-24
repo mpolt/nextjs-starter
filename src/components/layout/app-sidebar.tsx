@@ -4,7 +4,10 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { HomeIcon } from "lucide-react"
 
-import { isNavItemActive, navItems } from "@/config/nav"
+import {
+  getVisibleNavItems,
+  isNavItemActive,
+} from "@/config/nav"
 import {
   Sidebar,
   SidebarContent,
@@ -19,8 +22,13 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  isAdmin?: boolean
+}
+
+export function AppSidebar({ isAdmin = false }: AppSidebarProps) {
   const pathname = usePathname()
+  const items = getVisibleNavItems(isAdmin)
 
   return (
     <Sidebar collapsible="icon">
@@ -37,7 +45,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {items.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     render={<Link href={item.href} />}

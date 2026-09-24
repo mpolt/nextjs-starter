@@ -1,10 +1,15 @@
 import type { LucideIcon } from "lucide-react"
-import { LayoutDashboardIcon } from "lucide-react"
+import {
+  LayoutDashboardIcon,
+  SettingsIcon,
+  ShieldIcon,
+} from "lucide-react"
 
 export type NavItem = {
   title: string
   href: string
   icon: LucideIcon
+  adminOnly?: boolean
 }
 
 export type BreadcrumbCrumb = {
@@ -18,7 +23,22 @@ export const navItems: NavItem[] = [
     href: "/dashboard",
     icon: LayoutDashboardIcon,
   },
+  {
+    title: "Konto",
+    href: "/dashboard/account",
+    icon: SettingsIcon,
+  },
+  {
+    title: "Admin",
+    href: "/dashboard/admin",
+    icon: ShieldIcon,
+    adminOnly: true,
+  },
 ]
+
+export function getVisibleNavItems(isAdmin: boolean) {
+  return navItems.filter((item) => !item.adminOnly || isAdmin)
+}
 
 export function isNavItemActive(pathname: string, href: string) {
   if (href === "/dashboard") {

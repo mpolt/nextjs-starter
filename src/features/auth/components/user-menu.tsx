@@ -1,7 +1,12 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react"
+import {
+  ChevronsUpDownIcon,
+  LogOutIcon,
+  SettingsIcon,
+} from "lucide-react"
 
 import { authClient } from "@/features/auth/client"
 import { Button } from "@/components/ui/button"
@@ -63,6 +68,15 @@ export function UserMenu({ user }: UserMenuProps) {
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => {
+            router.push("/dashboard/account")
+          }}
+        >
+          <SettingsIcon />
+          Konto
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
