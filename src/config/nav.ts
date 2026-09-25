@@ -3,6 +3,7 @@ import {
   LayoutDashboardIcon,
   SettingsIcon,
   ShieldIcon,
+  UsersIcon,
 } from "lucide-react"
 
 export type NavItem = {
@@ -22,6 +23,18 @@ export const navItems: NavItem[] = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboardIcon,
+  },
+  {
+    title: "Users",
+    href: "/dashboard/users",
+    icon: UsersIcon,
+    adminOnly: true,
+  },
+  {
+    title: "Users Pagination",
+    href: "/dashboard/users-pagination",
+    icon: UsersIcon,
+    adminOnly: true,
   },
   {
     title: "Konto",
