@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useTable } from "@tanstack/react-table"
 
@@ -8,10 +9,10 @@ import { DataTablePagination } from "@/components/ui/table/data-table-pagination
 import { DataTableSkeleton } from "@/components/ui/table/data-table-skeleton"
 import { DataTableToolbar } from "@/components/ui/table/data-table-toolbar"
 import {
-  usersColumns,
+  createUsersColumns,
   usersTableGlobalFilterFn,
 } from "@/features/users/components/users-table/columns"
-import { listUsers } from "@/features/users/server/list-users"
+import { usersQueryOptions } from "@/features/users/queries"
 import {
   dataTablePaginationFeatures,
   type DataTableFeatures,
@@ -22,15 +23,23 @@ import type { UserListItem } from "@/features/users/types"
 const emptyUsers: UserListItem[] = []
 
 export function UsersTablePaginated() {
-  const { data, isPending, isError, error, refetch } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => listUsers(),
-  })
+  const { data, isPending, isError, error, refetch } = useQuery(
+    usersQueryOptions()
+  )
+
+  const columns = useMemo(
+    () =>
+      createUsersColumns({
+        onEdit: () => undefined,
+        onDelete: () => undefined,
+      }),
+    []
+  )
 
   const table = useTable<DataTablePaginationFeatures, UserListItem>(
     {
       features: dataTablePaginationFeatures,
-      columns: usersColumns as never,
+      columns: columns as never,
       data: data ?? emptyUsers,
       getRowId: (row) => row.id,
       globalFilterFn: usersTableGlobalFilterFn,
@@ -60,9 +69,9 @@ export function UsersTablePaginated() {
   if (isPending) {
     return (
       <DataTableSkeleton
-        columnCount={3}
+        columnCount={4}
         filterCount={1}
-        cellWidths={["40%", "20%", "20%"]}
+        cellWidths={["40%", "20%", "20%", "10%"]}
       />
     )
   }

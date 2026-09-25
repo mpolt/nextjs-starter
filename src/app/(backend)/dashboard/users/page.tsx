@@ -17,5 +17,6 @@ export default async function UsersPage() {
     redirect("/dashboard")
   }
 
-  return <UsersView />
+  // userID damit man sich nicht selbst löschen kann
+  return <UsersView currentUserId={session.user.id} />
 }

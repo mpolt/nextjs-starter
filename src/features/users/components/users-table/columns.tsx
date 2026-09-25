@@ -2,6 +2,7 @@
 
 import { DataTableColumnHeader } from "@/components/ui/table/data-table-column-header"
 import { Badge } from "@/components/ui/badge"
+import { UserRowActions } from "@/features/users/components/users-table/user-row-actions"
 import {
   arrayIncludesSome,
   createDataTableColumnHelper,
@@ -21,6 +22,12 @@ const statusLabels = {
   invited: "Eingeladen",
 } as const
 
+export type UsersColumnsActions = {
+  currentUserId?: string
+  onEdit: (user: UserListItem) => void
+  onDelete: (user: UserListItem) => void
+}
+
 export function usersTableGlobalFilterFn(
   row: { original: UserListItem },
   _columnId: string,
@@ -39,89 +46,111 @@ export function usersTableGlobalFilterFn(
   )
 }
 
-export const usersColumns = helper.columns([
-  helper.accessor("name", {
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex min-w-0 flex-col gap-0.5 py-0.5">
-        <span className="truncate font-medium text-foreground">
-          {row.original.name}
-        </span>
-        <span className="truncate text-sm text-muted-foreground">
-          {row.original.email}
-        </span>
-      </div>
-    ),
-    sortFn: "alphanumeric",
-    enableColumnFilter: false,
-    meta: {
-      label: "Name",
-      placeholder: "Nutzer suchen...",
-    },
-  }),
-  helper.accessor("role", {
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Rolle" />
-    ),
-    cell: ({ getValue }) => {
-      const roles = parseUserRoles(String(getValue() ?? ""))
-      if (roles.length === 0) {
+export function createUsersColumns(actions: UsersColumnsActions) {
+  return helper.columns([
+    helper.accessor("name", {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Name" />
+      ),
+      cell: ({ row }) => (
+        <div className="flex min-w-0 flex-col gap-0.5 py-0.5">
+          <span className="truncate font-medium text-foreground">
+            {row.original.name}
+          </span>
+          <span className="truncate text-sm text-muted-foreground">
+            {row.original.email}
+          </span>
+        </div>
+      ),
+      sortFn: "alphanumeric",
+      enableColumnFilter: false,
+      meta: {
+        label: "Name",
+        placeholder: "Nutzer suchen...",
+      },
+    }),
+    helper.accessor("role", {
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Rolle" />
+      ),
+      cell: ({ getValue }) => {
+        const roles = parseUserRoles(String(getValue() ?? ""))
+        if (roles.length === 0) {
+          return (
+            <Badge variant="outline" className="font-normal capitalize">
+              user
+            </Badge>
+          )
+        }
+
         return (
-          <Badge variant="outline" className="font-normal capitalize">
-            user
+          <div className="flex flex-wrap gap-1">
+            {roles.map((role) => (
+              <Badge
+                key={role}
+                variant="outline"
+                className="font-normal capitalize"
+              >
+                {role}
+              </Badge>
+            ))}
+          </div>
+        )
+      },
+      enableSorting: false,
+      enableGlobalFilter: false,
+      filterFn: arrayIncludesSome,
+      meta: {
+        label: "Rollen",
+        variant: "multiSelect",
+      },
+    }),
+    helper.accessor((row) => getUserStatus(row), {
+      id: "status",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Status" />
+      ),
+      cell: ({ getValue }) => {
+        const status = getValue()
+        return (
+          <Badge
+            variant={status === "active" ? "default" : "secondary"}
+            className={cn(
+              "font-normal",
+              status === "active" &&
+                "bg-foreground text-background hover:bg-foreground/90"
+            )}
+          >
+            {statusLabels[status]}
           </Badge>
         )
-      }
-
-      return (
-        <div className="flex flex-wrap gap-1">
-          {roles.map((role) => (
-            <Badge
-              key={role}
-              variant="outline"
-              className="font-normal capitalize"
-            >
-              {role}
-            </Badge>
-          ))}
-        </div>
-      )
-    },
-    enableSorting: false,
-    enableGlobalFilter: false,
-    filterFn: arrayIncludesSome,
-    meta: {
-      label: "Rollen",
-      variant: "multiSelect",
-    },
-  }),
-  helper.accessor((row) => getUserStatus(row), {
-    id: "status",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
-    ),
-    cell: ({ getValue }) => {
-      const status = getValue()
-      return (
-        <Badge
-          variant={status === "active" ? "default" : "secondary"}
-          className={cn(
-            "font-normal",
-            status === "active" &&
-              "bg-foreground text-background hover:bg-foreground/90"
-          )}
-        >
-          {statusLabels[status]}
-        </Badge>
-      )
-    },
-    enableSorting: false,
-    enableColumnFilter: false,
-    enableGlobalFilter: false,
-    meta: {
-      label: "Status",
-    },
-  }),
-])
+      },
+      enableSorting: false,
+      enableColumnFilter: false,
+      enableGlobalFilter: false,
+      meta: {
+        label: "Status",
+      },
+    }),
+    helper.display({
+      id: "actions",
+      header: () => <span className="sr-only">Aktionen</span>,
+      cell: ({ row }) => {
+        return (
+          <div className="flex justify-end">
+            <UserRowActions
+              user={row.original}
+              currentUserId={actions.currentUserId}
+              onEdit={actions.onEdit}
+              onDelete={actions.onDelete}
+            />
+          </div>
+        )
+      },
+      enableSorting: false,
+      enableColumnFilter: false,
+      enableGlobalFilter: false,
+      enableHiding: false,
+    }),
+  ])
+}

@@ -19,6 +19,9 @@ export async function listUsers(): Promise<UserListItem[]> {
   }
 
   const users = await prisma.user.findMany({
+    where: {
+      deletedAt: null,
+    },
     select: {
       id: true,
       name: true,
